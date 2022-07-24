@@ -45,7 +45,6 @@ if __name__ == '__main__':
                 record_key = msg.key()
                 record_value = msg.value()
                 data = json.loads(record_value)
-                print('type of record_value is ', type(record_value), '\ntype of data is ', type(data), '\n\n')
                 # count = data['count']
                 # total_count += count
                 print("Consumed record with key {} and value \n"

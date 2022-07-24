@@ -3,15 +3,11 @@
 from confluent_kafka import Producer
 import json
 import ccloud_lib
-# from stat import S_ISDIR
-# from posixpath import split
 from sys import platform
 import subprocess
 import pandas as pd
 from time import sleep
 from pprint import pprint
-# from json import dumps
-# from kafka import KafkaProducer
 
 if __name__ == '__main__':
 
@@ -50,10 +46,6 @@ if __name__ == '__main__':
         json_dict = json.loads(json_dict)
         record_value = json.dumps(json_dict, indent=4)
         print("Producing record: {}\n".format(record_key))
-        # print('type of json_dict is ', type(json_dict), '\n')
-        # pprint(json_dict)
-        # json_dict = dict(json_dict)
-        # print('type of json_dict is ', type(json_dict), '\n')
         pprint(json_dict)
         producer.produce(
             topic,
@@ -86,9 +78,7 @@ if __name__ == '__main__':
             print('----------------------------------------------------------------------')
             print("pandas dataframe\n", networks_df)
             data = networks_df.to_json()
-            # print(data)
             producer_send(producer, json_dict=data, topic='test1')
-            # producer.send('test', value=data)
             print("sending the data and sleeping for 5 sec-----------------------------------------")
             sleep(5)
 
@@ -120,7 +110,6 @@ if __name__ == '__main__':
             print("pandas dataframe\n", networks_df)
             data = networks_df.to_json()
             producer_send(producer, json_dict=data, topic='test1')
-            # producer.send('test', value=data)
             print("sending the data and sleeping for 5 sec-----------------------------------------")
             sleep(5)
 
@@ -163,28 +152,3 @@ if __name__ == '__main__':
             # producer.send('test', value=data)
             print("sending the data and sleeping for 5 sec-----------------------------------------")
             sleep(5)
-
-
-
-'''
-    for n in range(10):
-        record_key = "alice"
-        record_value = json.dumps({'count': n})
-        print("Producing record: {}\t{}".format(record_key, record_value))
-        producer.produce(
-            topic,
-            key=record_key,
-            value=record_value,
-            on_delivery=acked
-        )
-        
-        # p.poll() serves delivery reports (on_delivery)
-        # from previous produce() calls.
-        producer.poll(0)
-'''
-
-
-
-
-
-# handle the flush in infinite while loop
