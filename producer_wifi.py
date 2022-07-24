@@ -9,6 +9,7 @@ from sys import platform
 import subprocess
 import pandas as pd
 from time import sleep
+from pprint import pprint
 # from json import dumps
 # from kafka import KafkaProducer
 
@@ -46,8 +47,14 @@ if __name__ == '__main__':
 
     def producer_send(producer, json_dict, topic='test1'):
         record_key = "data"
+        json_dict = json.loads(json_dict)
         record_value = json.dumps(json_dict, indent=4)
-        print("Producing record: {}\t{}".format(record_key, json_dict))
+        print("Producing record: {}\n".format(record_key))
+        # print('type of json_dict is ', type(json_dict), '\n')
+        # pprint(json_dict)
+        # json_dict = dict(json_dict)
+        # print('type of json_dict is ', type(json_dict), '\n')
+        pprint(json_dict)
         producer.produce(
             topic,
             key=record_key,
