@@ -23,6 +23,21 @@ if __name__ == '__main__':
     # consumer_conf['auto.offset.reset'] = 'earliest'
     # consumer = Consumer(consumer_conf)
 
+    delivered_records = 0
+
+    def acked(err, msg):
+        global delivered_records
+        """Delivery report handler called on
+        successful or failed delivery of message
+        """
+        if err is not None:
+            print("Failed to deliver message: {}".format(err))
+        else:
+            delivered_records += 1
+            print("Produced record to topic {} partition [{}] @ offset {}"
+                  .format(msg.topic(), msg.partition(), msg.offset()))
+
+
     consumer_conf = {
                 'bootstrap.servers':'pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092',
                 'security.protocol':'SASL_SSL',
@@ -80,6 +95,64 @@ if __name__ == '__main__':
                 # pprint(data)
                 networks_df = pd.DataFrame(data)
                 print(networks_df, '\n\n')
+
+
+
+
+
+                # write a condition here when aggregated table should be sent, after every 5 seconds, or after all the mobiles have sent their raw tables
+
+                record_key = 'data'
+                data = {
+                    'data1' : 'answer1',
+                    'data2' : 'answer2'
+                }
+                record_value = json.dumps(data, indent=4)
+                print("Producing record: {} and value \n{}".format(record_key, data))
+
+                producer.produce(
+                    aggregate_data_topic,
+                    key=record_key,
+                    value=record_value,
+                    on_delivery=acked
+                )
+
+                producer.flush()
+
+                print("{} messages were produced to topic {}!".format(delivered_records, aggregate_data_topic))
+
+                
+                # p.poll() serves delivery reports (on_delivery)
+                # from previous produce() calls.
+                producer.poll(0)
+                '''
+        def producer_send(producer, json_dict, topic=raw_data_topic):
+        record_key = "data"
+        json_dict = json.loads(json_dict)
+
+        json_dict['producer_id'] = producer_id
+
+        record_value = json.dumps(json_dict, indent=4)
+        print("Producing record: {}\n".format(record_key))
+        networks_df = pd.DataFrame(json_dict)
+        print(networks_df)
+        producer.produce(
+            topic,
+            key=record_key,
+            value=record_value,
+            on_delivery=acked
+        )
+
+        producer.flush()
+
+        print("{} messages were produced to topic {}!".format(delivered_records, topic))
+
+        
+        # p.poll() serves delivery reports (on_delivery)
+        # from previous produce() calls.
+        producer.poll(0)
+                '''
+
     except KeyboardInterrupt:
         pass
     finally:
