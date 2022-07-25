@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# This comment may be deleted anytime in the future
 
 from confluent_kafka import Consumer
 import json
