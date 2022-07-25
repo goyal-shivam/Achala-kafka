@@ -37,8 +37,11 @@ if __name__ == '__main__':
 
     consumer = Consumer(conf)
 
+    raw_data_topic = 'raw_data'
+    aggregate_data_topic = 'aggregate_data'
+
     # Subscribe to topic
-    consumer.subscribe([topic])
+    consumer.subscribe([raw_data_topic])
 
     # Process messages
     total_count = 0
