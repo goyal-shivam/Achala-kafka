@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from confluent_kafka import Producer, Consumer
+from confluent_kafka import Consumer
 import json
 # import ccloud_lib
 from pprint import pprint
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     # consumer_conf['auto.offset.reset'] = 'earliest'
     # consumer = Consumer(consumer_conf)
 
-    consumer_conf = {
+    conf = {
                 'bootstrap.servers':'pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092',
                 'security.protocol':'SASL_SSL',
                 'sasl.mechanisms':'PLAIN',
@@ -35,17 +35,7 @@ if __name__ == '__main__':
                 'auto.offset.reset':'earliest',
     }
 
-    consumer = Consumer(consumer_conf)
-
-    producer_conf = {
-                'bootstrap.servers':'pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092',
-                'security.protocol':'SASL_SSL',
-                'sasl.mechanisms':'PLAIN',
-                'sasl.username':'REVSTSDUYSLPYRQH',
-                'sasl.password':'yf0PPm5bSDCC+fyj6mDDky7di3gg7uOIiq0a4I9RANbQLqIBWa195OsJ/XhvkTx7'
-            }
-
-    producer = Producer(producer_conf)
+    consumer = Consumer(conf)
 
     raw_data_topic = 'raw_data'
     aggregate_data_topic = 'aggregate_data'

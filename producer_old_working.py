@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from confluent_kafka import Producer, Consumer
+from confluent_kafka import Producer
 import json
 # import ccloud_lib
 from sys import platform
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # # Create Producer instance
     # producer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
 
-    producer_conf = {
+    conf = {
                 'bootstrap.servers':'pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092',
                 'security.protocol':'SASL_SSL',
                 'sasl.mechanisms':'PLAIN',
@@ -30,7 +30,7 @@ if __name__ == '__main__':
                 'sasl.password':'yf0PPm5bSDCC+fyj6mDDky7di3gg7uOIiq0a4I9RANbQLqIBWa195OsJ/XhvkTx7'
             }
 
-    producer = Producer(producer_conf)
+    producer = Producer(conf)
 
     # Create topic if needed
     # ccloud_lib.create_topic(conf, topic)
