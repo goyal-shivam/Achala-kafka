@@ -14,15 +14,17 @@ if __name__ == '__main__':
     # Read arguments and configurations and initialize
     args = ccloud_lib.parse_args()
     config_file = args.config_file
-    topic = args.topic
+    # topic = args.topic
     conf = ccloud_lib.read_ccloud_config(config_file)
+    raw_data_topic = 'raw_data'
+    aggregate_data_topic = 'aggregate_data'
 
     # Create Producer instance
     producer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
     producer = Producer(producer_conf)
 
     # Create topic if needed
-    ccloud_lib.create_topic(conf, topic)
+    # ccloud_lib.create_topic(conf, topic)
 
     delivered_records = 0
 
@@ -41,7 +43,7 @@ if __name__ == '__main__':
             print("Produced record to topic {} partition [{}] @ offset {}"
                   .format(msg.topic(), msg.partition(), msg.offset()))
 
-    def producer_send(producer, json_dict, topic='test1'):
+    def producer_send(producer, json_dict, topic=raw_data_topic):
         record_key = "data"
         json_dict = json.loads(json_dict)
         record_value = json.dumps(json_dict, indent=4)
@@ -78,7 +80,7 @@ if __name__ == '__main__':
             print('----------------------------------------------------------------------')
             print("pandas dataframe\n", networks_df)
             data = networks_df.to_json()
-            producer_send(producer, json_dict=data, topic='test1')
+            producer_send(producer, json_dict=data, topic=raw_data_topic)
             print("sending the data and sleeping for 5 sec-----------------------------------------")
             sleep(5)
 
@@ -109,7 +111,7 @@ if __name__ == '__main__':
             print('----------------------------------------------------------------------')
             print("pandas dataframe\n", networks_df)
             data = networks_df.to_json()
-            producer_send(producer, json_dict=data, topic='test1')
+            producer_send(producer, json_dict=data, topic=raw_data_topic)
             print("sending the data and sleeping for 5 sec-----------------------------------------")
             sleep(5)
 
@@ -148,7 +150,16 @@ if __name__ == '__main__':
                     ssid = bssid = ""
             print(networks_df)
             data = networks_df.to_json()
-            producer_send(producer, json_dict=data, topic='test1')
+            producer_send(producer, json_dict=data, topic=raw_data_topic)
             # producer.send('test', value=data)
             print("sending the data and sleeping for 5 sec-----------------------------------------")
             sleep(5)
+
+
+
+
+
+
+
+# handle partitioning of the aggregated table that comes back as a response
+# allow multiple consumers
