@@ -2,7 +2,7 @@
 
 from confluent_kafka import Producer
 import json
-import ccloud_lib
+# import ccloud_lib
 from sys import platform
 import subprocess
 import pandas as pd
@@ -11,17 +11,26 @@ from pprint import pprint
 
 if __name__ == '__main__':
 
-    # Read arguments and configurations and initialize
-    args = ccloud_lib.parse_args()
-    config_file = args.config_file
-    # topic = args.topic
-    conf = ccloud_lib.read_ccloud_config(config_file)
+    # # Read arguments and configurations and initialize
+    # args = ccloud_lib.parse_args()
+    # config_file = args.config_file
+    # # topic = args.topic
+    # conf = ccloud_lib.read_ccloud_config(config_file)
     raw_data_topic = 'raw_data'
     aggregate_data_topic = 'aggregate_data'
 
-    # Create Producer instance
-    producer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
-    producer = Producer(producer_conf)
+    # # Create Producer instance
+    # producer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
+
+    conf = {
+                'bootstrap.servers':'pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092',
+                'security.protocol':'SASL_SSL',
+                'sasl.mechanisms':'PLAIN',
+                'sasl.username':'REVSTSDUYSLPYRQH',
+                'sasl.password':'yf0PPm5bSDCC+fyj6mDDky7di3gg7uOIiq0a4I9RANbQLqIBWa195OsJ/XhvkTx7'
+            }
+
+    producer = Producer(conf)
 
     # Create topic if needed
     # ccloud_lib.create_topic(conf, topic)
@@ -163,3 +172,4 @@ if __name__ == '__main__':
 
 # handle partitioning of the aggregated table that comes back as a response
 # allow multiple consumers
+# remove pprint library

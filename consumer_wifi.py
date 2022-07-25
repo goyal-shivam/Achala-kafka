@@ -2,7 +2,7 @@
 
 from confluent_kafka import Consumer
 import json
-import ccloud_lib
+# import ccloud_lib
 from pprint import pprint
 import pandas as pd
 
@@ -10,18 +10,32 @@ import pandas as pd
 if __name__ == '__main__':
 
     # Read arguments and configurations and initialize
-    args = ccloud_lib.parse_args()
-    config_file = args.config_file
-    topic = args.topic
-    conf = ccloud_lib.read_ccloud_config(config_file)
+    # args = ccloud_lib.parse_args()
+    # config_file = args.config_file
+    # topic = args.topic
+    # conf = ccloud_lib.read_ccloud_config(config_file)
 
     # Create Consumer instance
     # 'auto.offset.reset=earliest' to start reading from the beginning of the
     #   topic if no committed offsets exist
-    consumer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
-    consumer_conf['group.id'] = 'python_example_group_1'
-    consumer_conf['auto.offset.reset'] = 'earliest'
-    consumer = Consumer(consumer_conf)
+    # consumer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
+    # consumer_conf['group.id'] = 'python_example_group_1'
+    # consumer_conf['auto.offset.reset'] = 'earliest'
+    # consumer = Consumer(consumer_conf)
+
+    conf = {
+                'bootstrap.servers':'pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092',
+                'security.protocol':'SASL_SSL',
+                'sasl.mechanisms':'PLAIN',
+                'sasl.username':'REVSTSDUYSLPYRQH',
+                'sasl.password':'yf0PPm5bSDCC+fyj6mDDky7di3gg7uOIiq0a4I9RANbQLqIBWa195OsJ/XhvkTx7',
+
+
+                'group.id':'python_example_group_1',
+                'auto.offset.reset':'earliest',
+    }
+
+    consumer = Consumer(conf)
 
     # Subscribe to topic
     consumer.subscribe([topic])
