@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# This is Kafka Consumer code
 from confluent_kafka import Consumer
 import json
 import ccloud_lib
