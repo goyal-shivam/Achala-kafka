@@ -17,6 +17,7 @@ if __name__ == '__main__':
     # conf = ccloud_lib.read_ccloud_config(config_file)
     raw_data_topic = 'raw_data'
     aggregate_data_topic = 'aggregate_data'
+    producer_id = input('Please enter a unique producer id -> ')
 
     # # Create Producer instance
     # producer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
@@ -55,7 +56,7 @@ if __name__ == '__main__':
         record_key = "data"
         json_dict = json.loads(json_dict)
 
-        json_dict['producer_id'] = input('Please enter a unique producer id -> ')
+        json_dict['producer_id'] = producer_id
 
         record_value = json.dumps(json_dict, indent=4)
         print("Producing record: {}\n".format(record_key))
