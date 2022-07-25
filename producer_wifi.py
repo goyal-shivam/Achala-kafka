@@ -29,8 +29,20 @@ if __name__ == '__main__':
                 'sasl.username':'REVSTSDUYSLPYRQH',
                 'sasl.password':'yf0PPm5bSDCC+fyj6mDDky7di3gg7uOIiq0a4I9RANbQLqIBWa195OsJ/XhvkTx7'
             }
+    consumer_conf = {
+                'bootstrap.servers':'pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092',
+                'security.protocol':'SASL_SSL',
+                'sasl.mechanisms':'PLAIN',
+                'sasl.username':'REVSTSDUYSLPYRQH',
+                'sasl.password':'yf0PPm5bSDCC+fyj6mDDky7di3gg7uOIiq0a4I9RANbQLqIBWa195OsJ/XhvkTx7',
 
+
+                'group.id':'python_example_group_1',
+                'auto.offset.reset':'earliest',
+    }
     producer = Producer(producer_conf)
+    consumer = Consumer(consumer_conf)
+    consumer.subscribe([aggregate_data_topic])
 
     # Create topic if needed
     # ccloud_lib.create_topic(conf, topic)
@@ -77,6 +89,20 @@ if __name__ == '__main__':
         # p.poll() serves delivery reports (on_delivery)
         # from previous produce() calls.
         producer.poll(0)
+        #-----------------------------------------------
+        # Here we are receiving the aggregated table: 
+        msg = consumer.poll(1.0)
+        record_key = msg.key()
+        record_value = msg.value()
+        data = json.loads(record_value)
+        # count = data['count']
+        # total_count += count
+        print("Consumed record with key {} and value \n"
+                .format(record_key))
+
+        # pprint(data)
+        aggregated_data = pd.DataFrame(data)
+        print(aggregated_data, '\n\n')
 
     print("Platform is: ", platform)
 
