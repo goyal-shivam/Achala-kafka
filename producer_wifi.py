@@ -7,7 +7,6 @@ from sys import platform
 import subprocess
 import pandas as pd
 from time import sleep
-from pprint import pprint
 
 if __name__ == '__main__':
 
@@ -55,9 +54,13 @@ if __name__ == '__main__':
     def producer_send(producer, json_dict, topic=raw_data_topic):
         record_key = "data"
         json_dict = json.loads(json_dict)
+
+        json_dict['producer_id'] = input('Please enter a unique producer id -> ')
+
         record_value = json.dumps(json_dict, indent=4)
         print("Producing record: {}\n".format(record_key))
-        pprint(json_dict)
+        networks_df = pd.DataFrame(json_dict)
+        print(networks_df)
         producer.produce(
             topic,
             key=record_key,
@@ -173,3 +176,12 @@ if __name__ == '__main__':
 # handle partitioning of the aggregated table that comes back as a response
 # allow multiple consumers
 # remove pprint library
+
+
+# json_dict = json.loads(json_dict)
+# record_value = json.dumps(json_dict, indent=4)
+# remove this contradicting opposite code
+
+
+# simplify sending json, then converting into dataframe just for printing,
+# do something to print in a nice format, and remove redundancies
