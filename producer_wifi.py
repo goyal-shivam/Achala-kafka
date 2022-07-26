@@ -6,7 +6,7 @@ import json
 from sys import platform
 import subprocess
 import pandas as pd
-from time import sleep
+from time import sleep, time
 
 if __name__ == '__main__':
 
@@ -69,6 +69,7 @@ if __name__ == '__main__':
         json_dict = json.loads(json_dict)
 
         json_dict['producer_id'] = producer_id
+        json_dict['timestamp'] = time()
 
         record_value = json.dumps(json_dict, indent=4)
         print("Producing record: {}\n".format(record_key))
@@ -89,20 +90,51 @@ if __name__ == '__main__':
         # p.poll() serves delivery reports (on_delivery)
         # from previous produce() calls.
         producer.poll(0)
+        
         #-----------------------------------------------
-        # Here we are receiving the aggregated table: 
-        msg = consumer.poll(1.0)
-        record_key = msg.key()
-        record_value = msg.value()
-        data = json.loads(record_value)
-        # count = data['count']
-        # total_count += count
-        print("Consumed record with key {} and value \n"
-                .format(record_key))
+        # Here we are receiving the aggregated table:
+        try:
+            while True:
+                msg = consumer.poll(1.0)
+                if msg is None:
+                    # No message available within timeout.
+                    # Initial message consumption may take up to
+                    # `session.timeout.ms` for the consumer group to
+                    # rebalance and start consuming
+                    print("Waiting for message or event/error in poll()")
+                    continue
+                elif msg.error():
+                    print('error: {}'.format(msg.error()))
+                else:
+                    # Check for Kafka message
+                    record_key = msg.key()
+                    record_value = msg.value()
+                    data = json.loads(record_value)
+                    # count = data['count']
+                    # total_count += count
+                    print("Consumed record with key {} and value \n"
+                        .format(record_key))
 
-        # pprint(data)
-        aggregated_data = pd.DataFrame(data)
-        print(aggregated_data, '\n\n')
+                    # pprint(data)
+                    # aggregated_data = pd.DataFrame(data)
+                    print(data, '\n\n')
+                    break
+        except KeyboardInterrupt:
+            pass
+        
+
+        # msg = consumer.poll(1.0)
+        # record_key = msg.key()
+        # record_value = msg.value()
+        # data = json.loads(record_value)
+        # # count = data['count']
+        # # total_count += count
+        # print("Consumed record with key {} and value \n"
+        #         .format(record_key))
+
+        # # pprint(data)
+        # aggregated_data = pd.DataFrame(data)
+        # print(aggregated_data, '\n\n')
 
     print("Platform is: ", platform)
 
@@ -120,8 +152,8 @@ if __name__ == '__main__':
             print("pandas dataframe\n", networks_df)
             data = networks_df.to_json()
             producer_send(producer, json_dict=data, topic=raw_data_topic)
-            print("sending the data and sleeping for 5 sec-----------------------------------------")
-            sleep(5)
+            print("sending the data and sleeping for 10 sec-----------------------------------------")
+            sleep(10)
 
     elif platform == 'darwin':
         # OS X
