@@ -1,8 +1,7 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 
 from confluent_kafka import Producer, Consumer
 import json
-# import ccloud_lib
 from sys import platform
 import subprocess
 import pandas as pd
@@ -110,31 +109,14 @@ if __name__ == '__main__':
                     record_key = msg.key()
                     record_value = msg.value()
                     data = json.loads(record_value)
-                    # count = data['count']
-                    # total_count += count
                     print("Consumed record with key {} and value \n"
                         .format(record_key))
 
-                    # pprint(data)
-                    # aggregated_data = pd.DataFrame(data)
                     print(data, '\n\n')
                     break
         except KeyboardInterrupt:
             pass
         
-
-        # msg = consumer.poll(1.0)
-        # record_key = msg.key()
-        # record_value = msg.value()
-        # data = json.loads(record_value)
-        # # count = data['count']
-        # # total_count += count
-        # print("Consumed record with key {} and value \n"
-        #         .format(record_key))
-
-        # # pprint(data)
-        # aggregated_data = pd.DataFrame(data)
-        # print(aggregated_data, '\n\n')
 
     print("Platform is: ", platform)
 
@@ -216,7 +198,6 @@ if __name__ == '__main__':
                     # print(bssid)
 
                 if(len(ssid) and len(bssid)):
-                    # networks_df = networks_df.append({'BSSID': bssid, 'SSID': ssid}, ignore_index=True)
                     networks_df = pd.concat([networks_df, pd.DataFrame({'BSSID': bssid, 'SSID': ssid}, index=[0])]).reset_index(drop = True)
                     ssid = bssid = ""
             print(networks_df)

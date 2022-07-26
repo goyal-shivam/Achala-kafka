@@ -2,7 +2,6 @@
 
 from confluent_kafka import Producer, Consumer
 import json
-# import ccloud_lib
 from pprint import pprint
 import pandas as pd
 
@@ -87,8 +86,6 @@ if __name__ == '__main__':
                 record_key = msg.key()
                 record_value = msg.value()
                 data = json.loads(record_value)
-                # count = data['count']
-                # total_count += count
                 print("Consumed record with key {} and value \n"
                       .format(record_key))
 
@@ -125,33 +122,6 @@ if __name__ == '__main__':
                 # p.poll() serves delivery reports (on_delivery)
                 # from previous produce() calls.
                 producer.poll(0)
-                '''
-        def producer_send(producer, json_dict, topic=raw_data_topic):
-        record_key = "data"
-        json_dict = json.loads(json_dict)
-
-        json_dict['producer_id'] = producer_id
-
-        record_value = json.dumps(json_dict, indent=4)
-        print("Producing record: {}\n".format(record_key))
-        networks_df = pd.DataFrame(json_dict)
-        print(networks_df)
-        producer.produce(
-            topic,
-            key=record_key,
-            value=record_value,
-            on_delivery=acked
-        )
-
-        producer.flush()
-
-        print("{} messages were produced to topic {}!".format(delivered_records, topic))
-
-        
-        # p.poll() serves delivery reports (on_delivery)
-        # from previous produce() calls.
-        producer.poll(0)
-                '''
 
     except KeyboardInterrupt:
         pass
