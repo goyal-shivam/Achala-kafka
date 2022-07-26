@@ -199,16 +199,3 @@ if __name__ == '__main__':
 
 
 
-
-# handle partitioning of the aggregated table that comes back as a response
-# allow multiple consumers
-# remove pprint library
-
-
-# json_dict = json.loads(json_dict)
-# record_value = json.dumps(json_dict, indent=4)
-# remove this contradicting opposite code
-
-
-# simplify sending json, then converting into dataframe just for printing,
-# do something to print in a nice format, and remove redundancies
