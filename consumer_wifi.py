@@ -92,11 +92,6 @@ if __name__ == '__main__':
                 # pprint(data)
                 networks_df = pd.DataFrame(data)
                 print(networks_df, '\n\n')
-
-
-
-
-
                 # write a condition here when aggregated table should be sent, after every 5 seconds, or after all the mobiles have sent their raw tables
 
                 record_key = 'data'

@@ -36,7 +36,7 @@ if __name__ == '__main__':
                 'sasl.password':'yf0PPm5bSDCC+fyj6mDDky7di3gg7uOIiq0a4I9RANbQLqIBWa195OsJ/XhvkTx7',
 
 
-                'group.id':'python_example_group_1',
+                'group.id':producer_id, 
                 'auto.offset.reset':'earliest',
     }
     producer = Producer(producer_conf)
