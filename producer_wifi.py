@@ -65,6 +65,7 @@ if __name__ == '__main__':
 
     def producer_send(producer, json_dict, topic=raw_data_topic):
         record_key = "data"
+        print(json_dict)
         json_dict = json.loads(json_dict)
 
         json_dict['producer_id'] = producer_id
