@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
         producer.flush()
         print("sending the data and sleeping for 10 sec-----------------------------------------")
-        sleep(10)
+        # sleep(10)
         # print("{} messages were produced to topic {}!".format(delivered_records, topic))
 
         
@@ -95,30 +95,29 @@ if __name__ == '__main__':
         
         #-----------------------------------------------
         # Here we are receiving the aggregated table:
-        try:
-            while True:
-                msg = consumer.poll(1.0)
-                if msg is None:
-                    # No message available within timeout.
-                    # Initial message consumption may take up to
-                    # `session.timeout.ms` for the consumer group to
-                    # rebalance and start consuming
-                    print("Waiting for message or event/error in poll()")
-                    continue
-                elif msg.error():
-                    print('error: {}'.format(msg.error()))
-                else:
-                    # Check for Kafka message
-                    record_key = msg.key()
-                    record_value = msg.value()
-                    data = json.loads(record_value)
-                    print("Consumed record with key {} and value \n"
-                        .format(record_key))
+        
+        while True:
+            msg = consumer.poll(1.0)
+            if msg is None:
+                # No message available within timeout.
+                # Initial message consumption may take up to
+                # `session.timeout.ms` for the consumer group to
+                # rebalance and start consuming
+                print("Waiting for message or event/error in poll()")
+                continue
+            elif msg.error():
+                print('error: {}'.format(msg.error()))
+            else:
+                # Check for Kafka message
+                record_key = msg.key()
+                record_value = msg.value()
+                data = json.loads(record_value)
+                print("Consumed record with key {} and value \n"
+                    .format(record_key))
 
-                    print(data, '\n\n')
-                    break
-        except KeyboardInterrupt:
-            pass
+                print(data, '\n\n')
+                break
+        
         
 
     print("Platform is: ", platform)
