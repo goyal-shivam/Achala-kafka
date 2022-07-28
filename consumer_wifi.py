@@ -3,26 +3,12 @@
 from threading import currentThread
 from confluent_kafka import Producer, Consumer
 import json
-from pprint import pprint
 import pandas as pd
 import time 
 
 
 if __name__ == '__main__':
 
-    # Read arguments and configurations and initialize
-    # args = ccloud_lib.parse_args()
-    # config_file = args.config_file
-    # topic = args.topic
-    # conf = ccloud_lib.read_ccloud_config(config_file)
-
-    # Create Consumer instance
-    # 'auto.offset.reset=earliest' to start reading from the beginning of the
-    #   topic if no committed offsets exist
-    # consumer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
-    # consumer_conf['group.id'] = 'python_example_group_1'
-    # consumer_conf['auto.offset.reset'] = 'earliest'
-    # consumer = Consumer(consumer_conf)
 
     delivered_records = 0
     round_time = 10
@@ -48,6 +34,8 @@ if __name__ == '__main__':
 
 
                 'group.id':'python_example_group_1',
+        # 'auto.offset.reset=earliest' to start reading from the beginning of the
+        #   topic if no committed offsets exist
                 'auto.offset.reset':'earliest',
     }
 
@@ -73,7 +61,7 @@ if __name__ == '__main__':
     total_count = 0
     try:
         while True:
-            
+
             startTime = currentTime = time.time();
             tablesList = []
             while(currentTime - startTime < round_time):
@@ -91,35 +79,41 @@ if __name__ == '__main__':
                     # Check for Kafka message
                     record_key = msg.key()
                     record_value = msg.value()
-                    # data = json.loads(record_value)
-                    print("Consumed record with key {} and value \n{}\n"
-                        .format(record_key, record_value))
-                    # networks_df = pd.DataFrame(data)
-                    # print(networks_df, '\n\n')
+                    data_dict = json.loads(record_value)
+                    print('----------------------------------------------------------------------')
+                    print("Consumed record with key - {}\n"
+                        .format(record_key))
+
+                    networks_df = pd.DataFrame(data_dict)
                     
                     # Adding to TablesList which will later be sent to CR (Conflict Resolution) module 
-                    tablesList.append(record_value)
+                    tablesList.append(networks_df)
                     currentTime = time.time()
             # data = Conflict_Resolution_Algorithm(tablesList)
             record_key = 'aggregated_data'
-            print("\ntable list length is", len(tablesList), ", table: ", tablesList, "\n")
+            print("\nTable List length is", len(tablesList), ", The table is as follows: ")
+
+            for i in range(len(tablesList)):
+                print(f'\n{i+1}.\n{tablesList[i]}')
+
+            print()
+
             tablesList = []
             data = {
                 'sample_aggregated_data1' : 'answer1',
                 'sample_aggregated_data2' : 'answer2'
             }
+            
             producer.produce(
                 aggregate_data_topic,
                 key=record_key,
-                value=record_value,
+                value=json.dumps(data, indent=4),
+                # CHANGE - I am putting data in the value, instead of record_value which was originally put. Incase there is any issue, please tell.
                 on_delivery=acked
             )
 
             producer.flush()
 
-            # print("{} messages were produced to topic {}!".format(delivered_records, aggregate_data_topic))
-
-            
             # p.poll() serves delivery reports (on_delivery)
             # from previous produce() calls.
             producer.poll(0)

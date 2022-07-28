@@ -9,17 +9,9 @@ from time import sleep, time
 
 if __name__ == '__main__':
 
-    # # Read arguments and configurations and initialize
-    # args = ccloud_lib.parse_args()
-    # config_file = args.config_file
-    # # topic = args.topic
-    # conf = ccloud_lib.read_ccloud_config(config_file)
     raw_data_topic = 'raw_data'
     aggregate_data_topic = 'aggregate_data'
     producer_id = input('Please enter a unique producer id -> ')
-
-    # # Create Producer instance
-    # producer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
 
     producer_conf = {
                 'bootstrap.servers':'pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092',
@@ -39,12 +31,10 @@ if __name__ == '__main__':
                 'group.id':producer_id, 
                 'auto.offset.reset':'earliest',
     }
+
     producer = Producer(producer_conf)
     consumer = Consumer(consumer_conf)
     consumer.subscribe([aggregate_data_topic])
-
-    # Create topic if needed
-    # ccloud_lib.create_topic(conf, topic)
 
     delivered_records = 0
 
@@ -67,13 +57,13 @@ if __name__ == '__main__':
         networks_df['producer_id'] = producer_id
         networks_df['timestamp'] = time()
         print('----------------------------------------------------------------------')
-        print("pandas dataframe\n", networks_df)
+        print("###\tData sent in Pandas Dataframe Format\n", networks_df)
         data = networks_df.to_json()
 
         record_key = "data"
         record_value = data
 
-        print("sending the data and sleeping for 10 sec-----------------------------------------")
+        print("! Sending table to CRU. Sleeping for 10 secs")
 
         producer.produce(
             topic,
@@ -84,7 +74,7 @@ if __name__ == '__main__':
 
         producer.flush()
 
-        print("{} messages were produced to topic {}!".format(delivered_records, topic))
+        print("! {} messages were produced to topic {}!".format(delivered_records, topic))
         # CHANGE - this message will appear after sending the values, sending data is printed before sending. ek rakhna hai toh bata do
         sleep(10)
 
@@ -111,11 +101,13 @@ if __name__ == '__main__':
                 # Check for Kafka message
                 record_key = msg.key()
                 record_value = msg.value()
-                data = json.loads(record_value)
-                print("Consumed record with key {} and value \n"
+                data_dict = json.loads(record_value)
+                print('----------------------------------------------------------------------')
+                print("Consumed record with key - {}\n###\tData received in Pandas Dataframe Format\n"
                     .format(record_key))
 
-                print(data, '\n\n')
+                networks_df = pd.DataFrame(data_dict)
+                print(networks_df, '\n\n')
                 break
         
         
@@ -136,10 +128,6 @@ if __name__ == '__main__':
                 bssid = details[0].strip()
                 ssid = details[1].strip()
                 networks_df = pd.concat([networks_df, pd.DataFrame({'BSSID': bssid, 'SSID': ssid}, index=[0])]).reset_index(drop = True)
-            # networks_df = pd.DataFrame([x.split(' ', 1) for x in output.split('\n')[1:-1]])
-            # networks_df.columns = ['BSSID', 'SSID']
-            print('----------------------------------------------------------------------')
-            # print("pandas dataframe\n", networks_df)
             producer_send(producer, networks_df=networks_df, topic=raw_data_topic)
 
 
@@ -154,12 +142,6 @@ if __name__ == '__main__':
             networks_df = pd.DataFrame(columns = ['BSSID', 'SSID'])
 
             # Below splitting is based on print format of airport command
-            # bssid_index = scan_out.find("BSSID")
-            # rssi_index = scan_out.find("RSSI")
-            # for line in scan_out.split('\n')[1:-1]:
-            #     ssid = line[:bssid_index - 1].strip()
-            #     bssid = line[bssid_index:rssi_index - 1]
-            #     networks_df = pd.concat([networks_df, pd.DataFrame({'BSSID': bssid, 'SSID': ssid}, index=[0])]).reset_index(drop = True)
             for line in scan_out.split('\n')[1:-1]:
                 last_colon_index = line.rfind(':')
                 bssid_index = last_colon_index - 14
@@ -174,14 +156,10 @@ if __name__ == '__main__':
             # using the check_output() for having the network term retrieval
             devices = subprocess.check_output(['netsh','wlan','show','network', 'bssid'])
 
-            # print(devices)
-            # decode it to strings
-
             devices = devices.decode('utf-8')
             devices= devices.replace("\r","")
             
             # displaying the information
-            # print(devices)
             networks_df = pd.DataFrame(columns = ['BSSID', 'SSID'])
             ssid=""
             bssid=""
@@ -210,8 +188,6 @@ if __name__ == '__main__':
 
 
 # handle partitioning of the aggregated table that comes back as a response
-# allow multiple consumers
-# remove pprint library
 
 
 # json_dict = json.loads(json_dict)

@@ -175,7 +175,6 @@ if __name__ == '__main__':
 
 # handle partitioning of the aggregated table that comes back as a response
 # allow multiple consumers
-# remove pprint library
 
 
 # json_dict = json.loads(json_dict)

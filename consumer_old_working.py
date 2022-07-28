@@ -3,7 +3,6 @@
 from confluent_kafka import Consumer
 import json
 # import ccloud_lib
-from pprint import pprint
 import pandas as pd
 
 
@@ -67,7 +66,6 @@ if __name__ == '__main__':
                 print("Consumed record with key {} and value \n"
                       .format(record_key))
 
-                # pprint(data)
                 networks_df = pd.DataFrame(data)
                 print(networks_df, '\n\n')
     except KeyboardInterrupt:
