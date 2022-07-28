@@ -25,7 +25,7 @@ if __name__ == '__main__':
     # consumer = Consumer(consumer_conf)
 
     delivered_records = 0
-    round_time = 20
+    round_time = 10
     def acked(err, msg):
         global delivered_records
         """Delivery report handler called on
@@ -102,7 +102,7 @@ if __name__ == '__main__':
                     currentTime = time.time()
             # data = Conflict_Resolution_Algorithm(tablesList)
             record_key = 'aggregated_data'
-            print("table length is", len(tablesList), ", table: ", tablesList)
+            print("\ntable list length is", len(tablesList), ", table: ", tablesList, "\n")
             tablesList = []
             data = {
                 'sample_aggregated_data1' : 'answer1',

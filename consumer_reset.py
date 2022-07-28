@@ -35,13 +35,13 @@ if __name__ == '__main__':
                 'auto.offset.reset':'earliest',
     }
 
-    consumer = Consumer(conf)
-
+    consumer_raw = Consumer(conf)
+    consumer_aggregate = Consumer(conf)
     raw_data_topic = 'raw_data'
     aggregate_data_topic = 'aggregate_data'
 
     # Subscribe to topic
-    consumer.subscribe([aggregate_data_topic])
+    consumer.subscribe([raw_data])
 
     # Process messages
     total_count = 0

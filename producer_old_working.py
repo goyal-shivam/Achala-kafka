@@ -2,7 +2,6 @@
 
 from confluent_kafka import Producer
 import json
-# import ccloud_lib
 from sys import platform
 import subprocess
 import pandas as pd
