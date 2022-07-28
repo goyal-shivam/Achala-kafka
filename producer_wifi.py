@@ -36,7 +36,7 @@ if __name__ == '__main__':
                 'sasl.password':'yf0PPm5bSDCC+fyj6mDDky7di3gg7uOIiq0a4I9RANbQLqIBWa195OsJ/XhvkTx7',
 
 
-                'group.id':'python_example_group_1',
+                'group.id':producer_id, 
                 'auto.offset.reset':'earliest',
     }
     producer = Producer(producer_conf)
@@ -85,6 +85,7 @@ if __name__ == '__main__':
         producer.flush()
 
         print("{} messages were produced to topic {}!".format(delivered_records, topic))
+        # CHANGE - this message will appear after sending the values, sending data is printed before sending. ek rakhna hai toh bata do
         sleep(10)
 
         
@@ -94,30 +95,29 @@ if __name__ == '__main__':
         
         #-----------------------------------------------
         # Here we are receiving the aggregated table:
-        try:
-            while True:
-                msg = consumer.poll(1.0)
-                if msg is None:
-                    # No message available within timeout.
-                    # Initial message consumption may take up to
-                    # `session.timeout.ms` for the consumer group to
-                    # rebalance and start consuming
-                    print("Waiting for message or event/error in poll()")
-                    continue
-                elif msg.error():
-                    print('error: {}'.format(msg.error()))
-                else:
-                    # Check for Kafka message
-                    record_key = msg.key()
-                    record_value = msg.value()
-                    data = json.loads(record_value)
-                    print("Consumed record with key {} and value \n"
-                        .format(record_key))
+        
+        while True:
+            msg = consumer.poll(1.0)
+            if msg is None:
+                # No message available within timeout.
+                # Initial message consumption may take up to
+                # `session.timeout.ms` for the consumer group to
+                # rebalance and start consuming
+                print("Waiting for message or event/error in poll()")
+                continue
+            elif msg.error():
+                print('error: {}'.format(msg.error()))
+            else:
+                # Check for Kafka message
+                record_key = msg.key()
+                record_value = msg.value()
+                data = json.loads(record_value)
+                print("Consumed record with key {} and value \n"
+                    .format(record_key))
 
-                    print(data, '\n\n')
-                    break
-        except KeyboardInterrupt:
-            pass
+                print(data, '\n\n')
+                break
+        
         
 
     print("Platform is: ", platform)
@@ -129,15 +129,19 @@ if __name__ == '__main__':
             output = subprocess.check_output(['nmcli', '-f', 'BSSID,SSID','dev' ,'wifi'])
             output = output.decode('utf-8')
             output= output.replace("\r","")
-
-            networks_df = pd.DataFrame([x.split(' ', 1) for x in output.split('\n')[1:-1]])
-            networks_df.columns = ['BSSID', 'SSID']
-            
-            
-            
-            
-            
+            networks_df = pd.DataFrame(columns = ['BSSID', 'SSID'])
+        
+            for line in output.splitlines()[1:]:
+                details = line.split(' ', 1)
+                bssid = details[0].strip()
+                ssid = details[1].strip()
+                networks_df = pd.concat([networks_df, pd.DataFrame({'BSSID': bssid, 'SSID': ssid}, index=[0])]).reset_index(drop = True)
+            # networks_df = pd.DataFrame([x.split(' ', 1) for x in output.split('\n')[1:-1]])
+            # networks_df.columns = ['BSSID', 'SSID']
+            print('----------------------------------------------------------------------')
+            # print("pandas dataframe\n", networks_df)
             producer_send(producer, networks_df=networks_df, topic=raw_data_topic)
+
 
     elif platform == 'darwin':
         # OS X

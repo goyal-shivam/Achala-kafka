@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
+from threading import currentThread
 from confluent_kafka import Producer, Consumer
 import json
 from pprint import pprint
 import pandas as pd
+import time 
 
 
 if __name__ == '__main__':
@@ -23,7 +25,7 @@ if __name__ == '__main__':
     # consumer = Consumer(consumer_conf)
 
     delivered_records = 0
-
+    round_time = 20
     def acked(err, msg):
         global delivered_records
         """Delivery report handler called on
@@ -71,57 +73,56 @@ if __name__ == '__main__':
     total_count = 0
     try:
         while True:
-            msg = consumer.poll(1.0)
-            if msg is None:
-                # No message available within timeout.
-                # Initial message consumption may take up to
-                # `session.timeout.ms` for the consumer group to
-                # rebalance and start consuming
-                print("Waiting for message or event/error in poll()")
-                continue
-            elif msg.error():
-                print('error: {}'.format(msg.error()))
-            else:
-                # Check for Kafka message
-                record_key = msg.key()
-                record_value = msg.value()
-                data = json.loads(record_value)
-                print("Consumed record with key {} and value \n"
-                      .format(record_key))
+            
+            startTime = currentTime = time.time();
+            tablesList = []
+            while(currentTime - startTime < round_time):
+                msg = consumer.poll(1.0)
+                if msg is None:
+                    # No message available within timeout.
+                    # Initial message consumption may take up to
+                    # `session.timeout.ms` for the consumer group to
+                    # rebalance and start consuming
+                    print("Waiting for message or event/error in poll()")
+                    continue
+                elif msg.error():
+                    print('error: {}'.format(msg.error()))
+                else:
+                    # Check for Kafka message
+                    record_key = msg.key()
+                    record_value = msg.value()
+                    # data = json.loads(record_value)
+                    print("Consumed record with key {} and value \n{}\n"
+                        .format(record_key, record_value))
+                    # networks_df = pd.DataFrame(data)
+                    # print(networks_df, '\n\n')
+                    
+                    # Adding to TablesList which will later be sent to CR (Conflict Resolution) module 
+                    tablesList.append(record_value)
+                    currentTime = time.time()
+            # data = Conflict_Resolution_Algorithm(tablesList)
+            record_key = 'aggregated_data'
+            print("table length is", len(tablesList), ", table: ", tablesList)
+            tablesList = []
+            data = {
+                'sample_aggregated_data1' : 'answer1',
+                'sample_aggregated_data2' : 'answer2'
+            }
+            producer.produce(
+                aggregate_data_topic,
+                key=record_key,
+                value=record_value,
+                on_delivery=acked
+            )
 
-                # pprint(data)
-                networks_df = pd.DataFrame(data)
-                print(networks_df, '\n\n')
+            producer.flush()
 
+            # print("{} messages were produced to topic {}!".format(delivered_records, aggregate_data_topic))
 
-
-
-
-                # write a condition here when aggregated table should be sent, after every 5 seconds, or after all the mobiles have sent their raw tables
-
-                record_key = 'data'
-                data = {
-                    'data1' : 'answer1',
-                    'data2' : 'answer2'
-                }
-                record_value = json.dumps(data, indent=4)
-                print("Producing record: {} and value \n{}".format(record_key, data))
-
-                producer.produce(
-                    aggregate_data_topic,
-                    key=record_key,
-                    value=record_value,
-                    on_delivery=acked
-                )
-
-                producer.flush()
-
-                print("{} messages were produced to topic {}!".format(delivered_records, aggregate_data_topic))
-
-                
-                # p.poll() serves delivery reports (on_delivery)
-                # from previous produce() calls.
-                producer.poll(0)
+            
+            # p.poll() serves delivery reports (on_delivery)
+            # from previous produce() calls.
+            producer.poll(0)
 
     except KeyboardInterrupt:
         pass
