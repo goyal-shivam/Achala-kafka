@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
         producer.flush()
         print("sending the data and sleeping for 10 sec-----------------------------------------")
-        # sleep(10)
+        sleep(10)
         # print("{} messages were produced to topic {}!".format(delivered_records, topic))
 
         
@@ -129,9 +129,15 @@ if __name__ == '__main__':
             output = subprocess.check_output(['nmcli', '-f', 'BSSID,SSID','dev' ,'wifi'])
             output = output.decode('utf-8')
             output= output.replace("\r","")
-
-            networks_df = pd.DataFrame([x.split(' ', 1) for x in output.split('\n')[1:-1]])
-            networks_df.columns = ['BSSID', 'SSID']
+            networks_df = pd.DataFrame(columns = ['BSSID', 'SSID'])
+        
+            for line in output.splitlines()[1:]:
+                details = line.split(' ', 1)
+                bssid = details[0].strip()
+                ssid = details[1].strip()
+                networks_df = pd.concat([networks_df, pd.DataFrame({'BSSID': bssid, 'SSID': ssid}, index=[0])]).reset_index(drop = True)
+            # networks_df = pd.DataFrame([x.split(' ', 1) for x in output.split('\n')[1:-1]])
+            # networks_df.columns = ['BSSID', 'SSID']
             print('----------------------------------------------------------------------')
             # print("pandas dataframe\n", networks_df)
             data = networks_df.to_json()
