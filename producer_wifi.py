@@ -63,18 +63,18 @@ if __name__ == '__main__':
             print("Produced record to topic {} partition [{}] @ offset {}"
                   .format(msg.topic(), msg.partition(), msg.offset()))
 
-    def producer_send(producer, json_dict, topic=raw_data_topic):
+    def producer_send(producer, networks_df, topic=raw_data_topic):
+        networks_df['producer_id'] = producer_id
+        networks_df['timestamp'] = time()
+        print('----------------------------------------------------------------------')
+        print("pandas dataframe\n", networks_df)
+        data = networks_df.to_json()
+
         record_key = "data"
-        print(json_dict)
-        json_dict = json.loads(json_dict)
+        record_value = data
 
-        json_dict['producer_id'] = producer_id
-        json_dict['timestamp'] = time()
+        print("sending the data and sleeping for 10 sec-----------------------------------------")
 
-        record_value = json.dumps(json_dict, indent=4)
-        print("Producing record: {}\n".format(record_key))
-        networks_df = pd.DataFrame(json_dict)
-        print(networks_df)
         producer.produce(
             topic,
             key=record_key,
@@ -85,6 +85,7 @@ if __name__ == '__main__':
         producer.flush()
 
         print("{} messages were produced to topic {}!".format(delivered_records, topic))
+        sleep(10)
 
         
         # p.poll() serves delivery reports (on_delivery)
@@ -131,12 +132,12 @@ if __name__ == '__main__':
 
             networks_df = pd.DataFrame([x.split(' ', 1) for x in output.split('\n')[1:-1]])
             networks_df.columns = ['BSSID', 'SSID']
-            print('----------------------------------------------------------------------')
-            print("pandas dataframe\n", networks_df)
-            data = networks_df.to_json()
-            producer_send(producer, json_dict=data, topic=raw_data_topic)
-            print("sending the data and sleeping for 10 sec-----------------------------------------")
-            sleep(10)
+            
+            
+            
+            
+            
+            producer_send(producer, networks_df=networks_df, topic=raw_data_topic)
 
     elif platform == 'darwin':
         # OS X
@@ -162,12 +163,7 @@ if __name__ == '__main__':
                 ssid = line[:bssid_index - 1].strip()
                 bssid = line[bssid_index:rssi_index - 1]
                 networks_df = pd.concat([networks_df, pd.DataFrame({'BSSID': bssid, 'SSID': ssid}, index=[0])]).reset_index(drop = True)
-            print('----------------------------------------------------------------------')
-            print("pandas dataframe\n", networks_df)
-            data = networks_df.to_json()
-            producer_send(producer, json_dict=data, topic=raw_data_topic)
-            print("sending the data and sleeping for 5 sec-----------------------------------------")
-            sleep(5)
+            producer_send(producer, networks_df=networks_df, topic=raw_data_topic)
 
     elif platform == 'win32':
         while True: 
@@ -201,12 +197,7 @@ if __name__ == '__main__':
                 if(len(ssid) and len(bssid)):
                     networks_df = pd.concat([networks_df, pd.DataFrame({'BSSID': bssid, 'SSID': ssid}, index=[0])]).reset_index(drop = True)
                     ssid = bssid = ""
-            print(networks_df)
-            data = networks_df.to_json()
-            producer_send(producer, json_dict=data, topic=raw_data_topic)
-            # producer.send('test', value=data)
-            print("sending the data and sleeping for 5 sec-----------------------------------------")
-            sleep(5)
+            producer_send(producer, networks_df=networks_df, topic=raw_data_topic)
 
 
 
