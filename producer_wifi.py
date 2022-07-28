@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
     def producer_send(producer, json_dict, topic=raw_data_topic):
         record_key = "data"
-        print(json_dict)
+        # print(json_dict)
         json_dict = json.loads(json_dict)
 
         json_dict['producer_id'] = producer_id
@@ -74,7 +74,8 @@ if __name__ == '__main__':
         record_value = json.dumps(json_dict, indent=4)
         print("Producing record: {}\n".format(record_key))
         networks_df = pd.DataFrame(json_dict)
-        print(networks_df)
+        # print(networks_df)
+        print(json_dict)
         producer.produce(
             topic,
             key=record_key,
@@ -83,8 +84,9 @@ if __name__ == '__main__':
         )
 
         producer.flush()
-
-        print("{} messages were produced to topic {}!".format(delivered_records, topic))
+        print("sending the data and sleeping for 10 sec-----------------------------------------")
+        sleep(10)
+        # print("{} messages were produced to topic {}!".format(delivered_records, topic))
 
         
         # p.poll() serves delivery reports (on_delivery)
@@ -132,11 +134,10 @@ if __name__ == '__main__':
             networks_df = pd.DataFrame([x.split(' ', 1) for x in output.split('\n')[1:-1]])
             networks_df.columns = ['BSSID', 'SSID']
             print('----------------------------------------------------------------------')
-            print("pandas dataframe\n", networks_df)
+            # print("pandas dataframe\n", networks_df)
             data = networks_df.to_json()
             producer_send(producer, json_dict=data, topic=raw_data_topic)
-            print("sending the data and sleeping for 10 sec-----------------------------------------")
-            sleep(10)
+
 
     elif platform == 'darwin':
         # OS X
