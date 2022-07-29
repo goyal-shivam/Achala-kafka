@@ -24,8 +24,6 @@ if __name__ == '__main__':
             print("Produced record to topic {} partition [{}] @ offset {}"
                   .format(msg.topic(), msg.partition(), msg.offset()))
 
-    consumer_id = input('Please enter a unique consumer id -> ')
-
     consumer_conf = {
                 'bootstrap.servers':'pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092',
                 'security.protocol':'SASL_SSL',
@@ -34,7 +32,7 @@ if __name__ == '__main__':
                 'sasl.password':'yf0PPm5bSDCC+fyj6mDDky7di3gg7uOIiq0a4I9RANbQLqIBWa195OsJ/XhvkTx7',
 
 
-                'group.id':consumer_id,
+                'group.id':'python_example_group_1',
         # 'auto.offset.reset=earliest' to start reading from the beginning of the
         #   topic if no committed offsets exist
                 'auto.offset.reset':'earliest',
