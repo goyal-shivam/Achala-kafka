@@ -63,6 +63,7 @@ if __name__ == '__main__':
 
             startTime = currentTime = time.time();
             tablesList = []
+            is_waiting = False
             while(currentTime - startTime < round_time):
                 msg = consumer.poll(1.0)
                 if msg is None:
@@ -70,10 +71,13 @@ if __name__ == '__main__':
                     # Initial message consumption may take up to
                     # `session.timeout.ms` for the consumer group to
                     # rebalance and start consuming
-                    print("Waiting for message or event/error in poll()")
+                    if(not is_waiting):
+                        print("Waiting for message or event/error in poll()")
+                        is_waiting = True
                     continue
                 elif msg.error():
                     print('error: {}'.format(msg.error()))
+                    is_waiting = False
                 else:
                     # Check for Kafka message
                     record_key = msg.key()
@@ -82,6 +86,8 @@ if __name__ == '__main__':
                     print('----------------------------------------------------------------------')
                     print("Consumed record with key - {}\n"
                         .format(record_key))
+
+                    is_waiting = False
 
                     networks_df = pd.DataFrame(data_dict)
                     
