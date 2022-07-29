@@ -41,6 +41,7 @@ if __name__ == '__main__':
     # Optional per-message on_delivery handler (triggered by poll() or flush())
     # when a message has been successfully delivered or
     # permanently failed delivery (after retries).
+
     def acked(err, msg):
         global delivered_records
         """Delivery report handler called on
@@ -50,8 +51,7 @@ if __name__ == '__main__':
             print("Failed to deliver message: {}".format(err))
         else:
             delivered_records += 1
-            print("Produced record to topic {} partition [{}] @ offset {}"
-                  .format(msg.topic(), msg.partition(), msg.offset()))
+            print(f"!!! Produced record to topic {msg.topic()} partition [{msg.partition()}] @ offset {msg.offset()}\ttotal-messages = {delivered_records}\nSleeping for 10 secs\n\n")
 
     def producer_send(producer, networks_df, topic=raw_data_topic):
         networks_df['producer_id'] = producer_id
@@ -63,7 +63,7 @@ if __name__ == '__main__':
         record_key = "data"
         record_value = data
 
-        print("! Sending table to CRU. Sleeping for 10 secs")
+        print("")
 
         producer.produce(
             topic,
@@ -74,18 +74,15 @@ if __name__ == '__main__':
 
         producer.flush()
 
-        print("! {} messages were produced to topic {}!".format(delivered_records, topic))
-        # CHANGE - this message will appear after sending the values, sending data is printed before sending. ek rakhna hai toh bata do
-        sleep(10)
-
-        
         # p.poll() serves delivery reports (on_delivery)
         # from previous produce() calls.
         producer.poll(0)
         
+        sleep(10)
+        
         #-----------------------------------------------
         # Here we are receiving the aggregated table:
-        
+        is_waiting = False
         while True:
             msg = consumer.poll(1.0)
             if msg is None:
@@ -93,10 +90,13 @@ if __name__ == '__main__':
                 # Initial message consumption may take up to
                 # `session.timeout.ms` for the consumer group to
                 # rebalance and start consuming
-                print("Waiting for message or event/error in poll()")
+                if(not is_waiting):
+                        print("Waiting for message or event/error in poll()")
+                        is_waiting = True
                 continue
             elif msg.error():
                 print('error: {}'.format(msg.error()))
+                is_waiting = False
             else:
                 # Check for Kafka message
                 record_key = msg.key()
@@ -105,6 +105,10 @@ if __name__ == '__main__':
                 print('----------------------------------------------------------------------')
                 print("Consumed record with key - {}\n###\tData received in Pandas Dataframe Format\n"
                     .format(record_key))
+
+                print(f'data dict is -> {data_dict}\n\n')
+
+                is_waiting = False
 
                 networks_df = pd.DataFrame(data_dict)
                 print(networks_df, '\n\n')

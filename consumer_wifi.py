@@ -61,7 +61,7 @@ if __name__ == '__main__':
     try:
         while True:
 
-            startTime = currentTime = time.time();
+            startTime = currentTime = time.time()
             tablesList = []
             is_waiting = False
             while(currentTime - startTime < round_time):
@@ -84,8 +84,7 @@ if __name__ == '__main__':
                     record_value = msg.value()
                     data_dict = json.loads(record_value)
                     print('----------------------------------------------------------------------')
-                    print("Consumed record with key - {}\n"
-                        .format(record_key))
+                    print("Consumed record with key - {}\n".format(record_key))
 
                     is_waiting = False
 
@@ -120,7 +119,6 @@ if __name__ == '__main__':
                 aggregate_data_topic,
                 key=record_key,
                 value=json.dumps(data, indent=4),
-                # CHANGE - I am putting data in the value, instead of record_value which was originally put. Incase there is any issue, please tell.
                 on_delivery=acked
             )
 

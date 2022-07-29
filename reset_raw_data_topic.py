@@ -40,13 +40,13 @@ if __name__ == '__main__':
     aggregate_data_topic = 'aggregate_data'
 
     # Subscribe to topic
-    consumer.subscribe([raw_data])
+    consumer_raw.subscribe([raw_data_topic])
 
     # Process messages
     total_count = 0
     try:
         while True:
-            msg = consumer.poll(1.0)
+            msg = consumer_raw.poll(1.0)
             if msg is None:
                 # No message available within timeout.
                 # Initial message consumption may take up to
@@ -72,4 +72,4 @@ if __name__ == '__main__':
         pass
     finally:
         # Leave group and commit final offsets
-        consumer.close()
+        consumer_raw.close()
