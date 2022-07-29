@@ -67,6 +67,7 @@ if __name__ == '__main__':
             is_waiting = False
             while(currentTime - startTime < round_time):
                 msg = consumer.poll(1.0)
+                currentTime = time.time()
                 if msg is None:
                     # No message available within timeout.
                     # Initial message consumption may take up to
@@ -94,7 +95,6 @@ if __name__ == '__main__':
                     # Adding to TablesList which will later be sent to CR (Conflict Resolution) module 
                     tablesList.append(networks_df)
                     print(f'\tTable length = {len(tablesList)}')
-                    currentTime = time.time()
             # data = Conflict_Resolution_Algorithm(tablesList)
             record_key = 'aggregated_data'
             round_number += 1
