@@ -11,6 +11,7 @@ if __name__ == '__main__':
 
     raw_data_topic = 'raw_data'
     aggregate_data_topic = 'aggregate_data'
+    round_time = 2
     producer_id = input('Please enter a unique producer id -> ')
 
     producer_conf = {
@@ -51,7 +52,7 @@ if __name__ == '__main__':
             print("Failed to deliver message: {}".format(err))
         else:
             delivered_records += 1
-            print(f"!!! Produced record to topic {msg.topic()} partition [{msg.partition()}] @ offset {msg.offset()}\ttotal-messages = {delivered_records}\nSleeping for 10 secs\n\n")
+            print(f"!!! Produced record to topic {msg.topic()} partition [{msg.partition()}] @ offset {msg.offset()}\ttotal-messages = {delivered_records}\nSleeping for {round_time} secs\n\n")
 
     def producer_send(producer, networks_df, topic=raw_data_topic):
         networks_df['producer_id'] = producer_id
@@ -78,7 +79,7 @@ if __name__ == '__main__':
         # from previous produce() calls.
         producer.poll(0)
         
-        sleep(10)
+        sleep(round_time)
         
         #-----------------------------------------------
         # Here we are receiving the aggregated table:

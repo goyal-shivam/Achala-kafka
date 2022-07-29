@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
 
     delivered_records = 0
-    round_time = 10
+    round_time = 2
     def acked(err, msg):
         global delivered_records
         """Delivery report handler called on
@@ -58,6 +58,7 @@ if __name__ == '__main__':
 
     # Process messages
     total_count = 0
+    round_number = 0
     try:
         while True:
 
@@ -84,7 +85,7 @@ if __name__ == '__main__':
                     record_value = msg.value()
                     data_dict = json.loads(record_value)
                     print('----------------------------------------------------------------------')
-                    print("Consumed record with key - {}\n".format(record_key))
+                    print(f"Consumed record with key - {record_key}", end='')
 
                     is_waiting = False
 
@@ -92,10 +93,12 @@ if __name__ == '__main__':
                     
                     # Adding to TablesList which will later be sent to CR (Conflict Resolution) module 
                     tablesList.append(networks_df)
+                    print(f'\tTable length = {len(tablesList)}')
                     currentTime = time.time()
             # data = Conflict_Resolution_Algorithm(tablesList)
             record_key = 'aggregated_data'
-            print("\nTable List length is", len(tablesList), ", The table is as follows: ")
+            round_number += 1
+            print(f"\nTable List length is {len(tablesList)}, round number = {round_number}. The table is as follows: ")
 
             for i in range(len(tablesList)):
                 print(f'\n{i+1}.\n{tablesList[i]}')
