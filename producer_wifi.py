@@ -6,6 +6,8 @@ from sys import platform
 import subprocess
 import pandas as pd
 from time import sleep, time
+import random
+import pygeohash as pgh
 
 if __name__ == '__main__':
 
@@ -53,10 +55,19 @@ if __name__ == '__main__':
         else:
             delivered_records += 1
             print(f"!!! Produced record to topic {msg.topic()} partition [{msg.partition()}] @ offset {msg.offset()}\ttotal-messages = {delivered_records}\nSleeping for {round_time} secs\n\n")
+    
+    def randomlatlon():
+        return (round(random.uniform( -90,  90), 5),
+                round(random.uniform(-180, 180), 5))
+
+    def mygeohash():
+        lat, lon = randomlatlon()
+        return (pgh.encode(lat, lon))
 
     def producer_send(producer, networks_df, topic=raw_data_topic):
         networks_df['producer_id'] = producer_id
         networks_df['timestamp'] = time()
+        networks_df['geohash'] = mygeohash()
         print('----------------------------------------------------------------------')
         print("###\tData sent in Pandas Dataframe Format\n", networks_df)
         data = networks_df.to_json()
@@ -121,6 +132,15 @@ if __name__ == '__main__':
 
 
     if platform == 'linux' or platform == 'linux2':
+        
+        # Finding my bssid
+        output_cmd = subprocess.check_output(['ifconfig','wlo1'])
+        output_cmd = output_cmd.decode('utf-8')
+        output_cmd= output_cmd.replace("\r","")
+        for line in output_cmd.splitlines():
+            if line.strip().startswith('ether'):
+                my_bssid = line.strip().split(' ')[1]
+        print("My bssid is: ", my_bssid, "\n")
         while True: 
             # subprocess.check_output('nmcli dev wifi rescan', shell=True)
             output = subprocess.check_output(['nmcli', '-f', 'BSSID,SSID','dev' ,'wifi'])
