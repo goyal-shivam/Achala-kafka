@@ -3,29 +3,15 @@
 from threading import currentThread
 from confluent_kafka import Producer, Consumer
 import json
-from pprint import pprint
 import pandas as pd
 import time 
 
 
 if __name__ == '__main__':
 
-    # Read arguments and configurations and initialize
-    # args = ccloud_lib.parse_args()
-    # config_file = args.config_file
-    # topic = args.topic
-    # conf = ccloud_lib.read_ccloud_config(config_file)
-
-    # Create Consumer instance
-    # 'auto.offset.reset=earliest' to start reading from the beginning of the
-    #   topic if no committed offsets exist
-    # consumer_conf = ccloud_lib.pop_schema_registry_params_from_config(conf)
-    # consumer_conf['group.id'] = 'python_example_group_1'
-    # consumer_conf['auto.offset.reset'] = 'earliest'
-    # consumer = Consumer(consumer_conf)
 
     delivered_records = 0
-    round_time = 10
+    round_time = 2
     def acked(err, msg):
         global delivered_records
         """Delivery report handler called on
@@ -38,7 +24,6 @@ if __name__ == '__main__':
             print("Produced record to topic {} partition [{}] @ offset {}"
                   .format(msg.topic(), msg.partition(), msg.offset()))
 
-
     consumer_conf = {
                 'bootstrap.servers':'pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092',
                 'security.protocol':'SASL_SSL',
@@ -48,6 +33,8 @@ if __name__ == '__main__':
 
 
                 'group.id':'python_example_group_1',
+        # 'auto.offset.reset=earliest' to start reading from the beginning of the
+        #   topic if no committed offsets exist
                 'auto.offset.reset':'earliest',
     }
 
@@ -71,11 +58,13 @@ if __name__ == '__main__':
 
     # Process messages
     total_count = 0
+    round_number = 0
     try:
         while True:
-            
-            startTime = currentTime = time.time();
+
+            startTime = currentTime = time.time()
             tablesList = []
+            is_waiting = False
             while(currentTime - startTime < round_time):
                 msg = consumer.poll(1.0)
                 if msg is None:
@@ -83,43 +72,61 @@ if __name__ == '__main__':
                     # Initial message consumption may take up to
                     # `session.timeout.ms` for the consumer group to
                     # rebalance and start consuming
-                    print("Waiting for message or event/error in poll()")
+                    if(not is_waiting):
+                        print("Waiting for message or event/error in poll()")
+                        is_waiting = True
                     continue
                 elif msg.error():
                     print('error: {}'.format(msg.error()))
+                    is_waiting = False
                 else:
                     # Check for Kafka message
                     record_key = msg.key()
                     record_value = msg.value()
-                    # data = json.loads(record_value)
-                    print("Consumed record with key {} and value \n{}\n"
-                        .format(record_key, record_value))
-                    # networks_df = pd.DataFrame(data)
-                    # print(networks_df, '\n\n')
+                    data_dict = json.loads(record_value)
+                    print('----------------------------------------------------------------------')
+                    print(f"Consumed record with key - {record_key}", end='')
+
+                    is_waiting = False
+
+                    networks_df = pd.DataFrame(data_dict)
                     
                     # Adding to TablesList which will later be sent to CR (Conflict Resolution) module 
-                    tablesList.append(record_value)
+                    tablesList.append(networks_df)
+                    print(f'\tTable length = {len(tablesList)}')
                     currentTime = time.time()
             # data = Conflict_Resolution_Algorithm(tablesList)
             record_key = 'aggregated_data'
-            print("\ntable list length is", len(tablesList), ", table: ", tablesList, "\n")
+            round_number += 1
+            print(f"\nTable List length is {len(tablesList)}, round number = {round_number}. The table is as follows: ")
+
+            for i in range(len(tablesList)):
+                print(f'\n{i+1}.\n{tablesList[i]}')
+
+            print()
+
             tablesList = []
+
             data = {
-                'sample_aggregated_data1' : 'answer1',
-                'sample_aggregated_data2' : 'answer2'
+                'COL1': {
+                    '0': 'ROW1COL1',
+                    '1': 'ROW2COL1'
+                },
+                'COL2': {
+                    '0': 'ROW1COL2',
+                    '1': 'ROW2COL2'
+                }
             }
+            
             producer.produce(
                 aggregate_data_topic,
                 key=record_key,
-                value=record_value,
+                value=json.dumps(data, indent=4),
                 on_delivery=acked
             )
 
             producer.flush()
 
-            # print("{} messages were produced to topic {}!".format(delivered_records, aggregate_data_topic))
-
-            
             # p.poll() serves delivery reports (on_delivery)
             # from previous produce() calls.
             producer.poll(0)

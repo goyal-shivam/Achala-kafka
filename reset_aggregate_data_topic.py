@@ -22,6 +22,8 @@ if __name__ == '__main__':
     # consumer_conf['auto.offset.reset'] = 'earliest'
     # consumer = Consumer(consumer_conf)
 
+    consumer_id = input('Please input the consumer group id for which you want to clear messages on the aggregate_data topic on Kafka server -> ')
+
     conf = {
                 'bootstrap.servers':'pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092',
                 'security.protocol':'SASL_SSL',
@@ -30,23 +32,23 @@ if __name__ == '__main__':
                 'sasl.password':'yf0PPm5bSDCC+fyj6mDDky7di3gg7uOIiq0a4I9RANbQLqIBWa195OsJ/XhvkTx7',
 
 
-                'group.id':'python_example_group_1',
+                'group.id':consumer_id,
                 'auto.offset.reset':'earliest',
     }
 
-    consumer = Consumer(conf)
-
-    raw_data_topic = 'raw_data'
+    # consumer_raw = Consumer(conf)
+    consumer_aggregate = Consumer(conf)
+    # raw_data_topic = 'raw_data'
     aggregate_data_topic = 'aggregate_data'
 
     # Subscribe to topic
-    consumer.subscribe([raw_data_topic])
+    consumer_aggregate.subscribe([aggregate_data_topic])
 
     # Process messages
     total_count = 0
     try:
         while True:
-            msg = consumer.poll(1.0)
+            msg = consumer_aggregate.poll(1.0)
             if msg is None:
                 # No message available within timeout.
                 # Initial message consumption may take up to
@@ -66,10 +68,10 @@ if __name__ == '__main__':
                 print("Consumed record with key {} and value \n"
                       .format(record_key))
 
-                networks_df = pd.DataFrame(data)
-                print(networks_df, '\n\n')
+                # networks_df = pd.DataFrame(data)
+                print(record_value, '\n\n')
     except KeyboardInterrupt:
         pass
     finally:
         # Leave group and commit final offsets
-        consumer.close()
+        consumer_aggregate.close()
