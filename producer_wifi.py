@@ -118,8 +118,6 @@ if __name__ == '__main__':
                 print("Consumed record with key - {}\n###\tData received in Pandas Dataframe Format\n"
                     .format(record_key))
 
-                print(f'data dict is -> {data_dict}\n\n')
-
                 is_waiting = False
 
                 networks_df = pd.DataFrame(data_dict)
