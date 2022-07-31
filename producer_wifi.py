@@ -13,9 +13,9 @@ if __name__ == '__main__':
 
     raw_data_topic = 'raw_data'
     aggregate_data_topic = 'aggregate_data'
-    round_time = 2
+    round_time = 10
     producer_id = input('Please enter a unique producer id -> ')
-
+    # producer_id = "not_defined_yet"
     producer_conf = {
                 'bootstrap.servers':'pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092',
                 'security.protocol':'SASL_SSL',
@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
                 is_waiting = False
 
-                networks_df = pd.DataFrame(data_dict)
+                networks_df = pd.DataFrame(data_dict, index = [0]).reset_index(drop = True)
                 print(networks_df, '\n\n')
                 break
         
@@ -141,6 +141,7 @@ if __name__ == '__main__':
             if line.strip().startswith('ether'):
                 my_bssid = line.strip().split(' ')[1]
         print("My bssid is: ", my_bssid, "\n")
+        # producer_id = my_bssid
         while True: 
             # subprocess.check_output('nmcli dev wifi rescan', shell=True)
             output = subprocess.check_output(['nmcli', '-f', 'BSSID,SSID','dev' ,'wifi'])
@@ -158,6 +159,17 @@ if __name__ == '__main__':
 
     elif platform == 'darwin':
         # OS X
+        # finding my_bssid: 
+        scan_cmd = subprocess.Popen(['ifconfig', 'en0'],    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        scan_out, scan_err = scan_cmd.communicate()
+        scan_out = scan_out.decode('utf-8')
+
+        # print(scan_out)
+        for line in scan_out.splitlines():
+            if line.strip().startswith('ether'):
+                my_bssid = line.strip().split(' ')[1]
+        print('my bssid is: ', my_bssid, '\n')
+        # producer_id = my_bssid
         while True: 
             scan_cmd = subprocess.Popen(['sudo', '/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-s'],    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             scan_out, scan_err = scan_cmd.communicate()
@@ -177,7 +189,17 @@ if __name__ == '__main__':
             producer_send(producer, networks_df=networks_df, topic=raw_data_topic)
 
     elif platform == 'win32':
+        # finding out my bssid: 
+        devices = subprocess.check_output(['netsh','wlan','show','interfaces'])
+        devices = devices.decode('utf-8', errors="ignore")
+        devices= devices.replace("\r","")
+        for line in devices.splitlines():
+            if line.strip().startswith('Physical address'):
+                my_bssid = line.split(' ')[-1].strip()
+        print("my_bssid is: ", my_bssid, "\n")
+        # producer_id = my_bssid
         while True: 
+            
             # using the check_output() for having the network term retrieval
             devices = subprocess.check_output(['netsh','wlan','show','network', 'bssid'])
 

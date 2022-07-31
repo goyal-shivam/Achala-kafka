@@ -38,6 +38,7 @@ if platform == 'linux' or platform == 'linux2':
 elif platform == 'darwin':
     # OS X
     while True: 
+        
         scan_cmd = subprocess.Popen(['sudo', '/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-s'],    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         scan_out, scan_err = scan_cmd.communicate()
         scan_out = scan_out.decode('utf-8')

@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
 
     delivered_records = 0
-    round_time = 2
+    round_time = 10
     def acked(err, msg):
         global delivered_records
         """Delivery report handler called on
@@ -102,10 +102,11 @@ if __name__ == '__main__':
 
             for i in range(len(tablesList)):
                 print(f'\n{i+1}.\n{tablesList[i]}')
-
             print()
 
-            tablesList = []
+            if len(tablesList) == 0 :
+                continue
+            # Conflict Resolution Algorithm is applied here and the output is say data
 
             data = {
                 'COL1': {
@@ -117,7 +118,7 @@ if __name__ == '__main__':
                     '1': 'ROW2COL2'
                 }
             }
-            
+             
             producer.produce(
                 aggregate_data_topic,
                 key=record_key,
@@ -130,6 +131,7 @@ if __name__ == '__main__':
             # p.poll() serves delivery reports (on_delivery)
             # from previous produce() calls.
             producer.poll(0)
+            tablesList = []
 
     except KeyboardInterrupt:
         pass
