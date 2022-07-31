@@ -67,7 +67,7 @@ if __name__ == '__main__':
             is_waiting = False
             while(currentTime - startTime < round_time):
                 msg = consumer.poll(1.0)
-                currentTime = time.time()
+                
                 if msg is None:
                     # No message available within timeout.
                     # Initial message consumption may take up to
@@ -80,6 +80,7 @@ if __name__ == '__main__':
                 elif msg.error():
                     print('error: {}'.format(msg.error()))
                     is_waiting = False
+                    currentTime = time.time()
                 else:
                     # Check for Kafka message
                     record_key = msg.key()
@@ -95,6 +96,8 @@ if __name__ == '__main__':
                     # Adding to TablesList which will later be sent to CR (Conflict Resolution) module 
                     tablesList.append(networks_df)
                     print(f'\tTable length = {len(tablesList)}')
+                    currentTime = time.time()
+                    
             # data = Conflict_Resolution_Algorithm(tablesList)
             record_key = 'aggregated_data'
             round_number += 1
