@@ -120,7 +120,8 @@ if __name__ == '__main__':
 
                 is_waiting = False
 
-                networks_df = pd.DataFrame(data_dict, index = [0]).reset_index(drop = True)
+                # networks_df = pd.DataFrame(data_dict, index = [0]).reset_index(drop = True)
+                networks_df = pd.DataFrame(data_dict)
                 print(networks_df, '\n\n')
                 break
         
